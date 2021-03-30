@@ -1,0 +1,77 @@
+What are the last five locations Clinton visited during the previous campaign?  
+
+SELECT DISTINCT location, date
+FROM tmc.clinton
+ORDER BY date DESC
+LIMIT 5
+
+Which locations did Clinton visit the most during the campaign?
+
+SELECT location, COUNT (*) as visits
+FROM tmc.clinton
+GROUP BY location
+ORDER BY visits DESC;
+
+How many events did Clinton do in October? (32 counting all of the events)
+
+SELECT COUNT (*)
+FROM tmc.clinton
+WHERE date  BETWEEN '2016-10-01 00:00:00' and '2016-10-31 00:00:00'
+ 
+
+How many distinct locations? (29) (3 places she went to twice)
+
+SELECT count (distinct location)
+FROM clinton
+WHERE date  BETWEEN '2016-10-01 00:00:00' and '2016-10-31 00:00:00'
+
+This will just get the list
+SELECT COUNT (location)
+FROM tmc.clinton
+WHERE date is BETWEEN 10/01/2016 and 10/31/2016
+ORDER BY location (DONT NEED THIS)
+
+
+
+Which five states had the most events for Trump in the last 30 days of the campaign? Shows the states plus # of visits
+
+SELECT state, COUNT (*) as visits
+FROM tmc.trump
+WHERE date BETWEEN '2016-10-09 00:00:00' and '2016-11-08 00:00:00'
+GROUP BY state
+ORDER BY visits DESC
+LIMIT 5
+
+
+How many states did Clinton visit: swing states vs. red states vs. blue states (define as you wish)?
+
+SELECT 
+case when state in ('CO', 'NV', 'NY', 'CA', 'IL' ) THEN 'blue'
+    when state in ('MI', 'NC','PA') THEN 'purple'
+    Else 'red'
+  END as state_type,
+    count (distinct state)
+    
+FROM tmc.clinton
+GROUP BY state_type
+
+What locations had the most combined visits between Trump and Clinton? 
+
+WITH hrc_locations AS (
+SELECT location AS location, count(*) AS hrc_visits
+FROM clinton 
+group by location
+order by hrc_visits desc)
+,
+djt_locations AS (
+SELECT location AS location, count(*) AS djt_visits
+FROM trump 
+group by location
+order by djt_visits desc)
+
+SELECT  hrc.location, hrc_visits + djt_visits AS combined_visits
+from hrc_locations hrc
+join djt_locations djt
+
+ON hrc.location = djt.location
+ORDER BY combined_visits DESC
